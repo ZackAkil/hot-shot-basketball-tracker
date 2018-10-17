@@ -1,0 +1,357 @@
+<html>
+
+<head>
+    <title>Hot Shot</title>
+    <meta name="description" content="See Zacks shooting progress, and be frightened!">
+    <link rel="shortcut icon" type="image/png" href="favicon.png"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.css" />
+    <style>
+        body {
+            background-color: rgb(251, 251, 251);
+            margin: 0;
+        }
+
+        #court-container {
+            height: 430px;
+            text-align: center;
+        }
+
+        #court-draw {
+            display: inline-block;
+            width: auto;
+            height: 430px;
+            text-align: center;
+            position: relative;
+        }
+
+        #court {
+            text-align: center;
+            opacity: 0.2;
+        }
+
+        .court-stat {
+            height: 50px;
+            width: 50px;
+            background-color: #ff5555;
+            border-radius: 50px;
+            position: relative;
+            /* border: 5px red solid; */
+            opacity: 0.6;
+            transition: all .5s ease;
+            /* transition: height .5s ease; */
+            /* transition: border-radius .5s; */
+            text-align: center;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .court-stat-container {
+            height: 300px;
+            width: 300px;
+            position: absolute;
+            /* border: 2px black dashed; */
+        }
+
+        #lc-conatiner {
+            left: -130;
+            top: -70;
+        }
+
+        #rc-conatiner {
+            left: 500;
+            top: -70;
+
+        }
+
+        #ft-conatiner {
+            left: 185;
+            top: 130;
+        }
+
+        .helper {
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+
+        #chart-conatiner {
+            max-width: 800px;
+            margin-right: auto;
+            margin-left: auto;
+            color: gray;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .title {
+            font-weight: 600;
+            margin-top: 20%;
+            display: block;
+            font-size: 1.4em;
+            border-bottom: solid 2px #00000075;
+            margin-left: 20%;
+            margin-right: 20%;
+        }
+
+        #header {
+            color: gray;
+            padding: 0.2em;
+            border-bottom: 10px solid coral;
+            margin: 8px;
+        }
+
+        footer {
+            background-color: coral;
+            color: white;
+            text-align: center;
+            margin-top: 100px;
+            padding: 10px;
+        }
+
+        #date {
+            display: inline-block;
+            position: absolute;
+            text-align: center;
+            width: 100%;
+            top: 4px;
+            color: #343434;
+            font-size: 1.1em;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"></script>
+</head>
+
+<body>
+    <h3 id="header">Hot Shot</h3>
+    <div id="court-container">
+        <div id="court-draw">
+            <div id="date">
+                <span id="date-text">16th October</span>
+            </div>
+            <img id="court" src="court.jpg" />
+            <div id="lc-conatiner" class="court-stat-container">
+                <span class="helper"></span>
+                <div class="court-stat" id="lc">
+                    <span class="title"></span>
+                    <span class="subTitle"></span>
+                </div>
+            </div>
+            <div id="rc-conatiner" class="court-stat-container">
+                <span class="helper"></span>
+                <div class="court-stat" id="rc">
+                    <span class="title"></span>
+                    <span class="subTitle"></span>
+                </div>
+            </div>
+            <div id="ft-conatiner" class="court-stat-container">
+                <span class="helper"></span>
+                <div class="court-stat" id="ft">
+                    <span class="title"></span>
+                    <span class="subTitle"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="chart-conatiner">
+        <p>Hover over points on the graph to see them on the court view.</p>
+
+        <canvas id="myChart" width="400" height="200"></canvas>
+    </div>
+
+    <footer>
+        <span>Built by the future 'Round the World' Champ, Zack 🏆</span>
+    </footer>
+
+    <script>
+
+        var dates = [ // Date Objects
+                    moment("2018-10-16"),
+                    moment("2018-10-17"),
+                ];
+
+        var shotsMade = {
+            'lc': [0, 9],
+            'rc': [0, 13],
+            'ft': [0, 38]
+        }
+
+        var volume = {
+            'lc': [0, 50],
+            'rc': [0, 50],
+            'ft': [0, 100]
+        }
+
+        var percentages = {
+            'lc': [0, 18],
+            'rc': [0, 26],
+            'ft': [0, 38]
+        }
+
+        function displayDayOnCourt(dayIndex) {
+
+            ['lc', 'rc', 'ft'].forEach(function (element) {
+                var per = percentages[element][dayIndex];
+                var vol = volume[element][dayIndex];
+                var sm = shotsMade[element][dayIndex];
+
+                var circle = document.getElementById(element);
+
+                var title = circle.getElementsByClassName("title")[0];
+                var subTitle = circle.getElementsByClassName("subTitle")[0];
+                title.innerHTML = per.toString() + "%";
+                subTitle.innerHTML = sm.toString() + "/" + vol.toString();
+
+                var goodPercentage = (element == 'ft') ? 90 : 60
+                console.log(goodPercentage)
+                var relativePercentage = per / goodPercentage;
+                circle.style.backgroundColor = getColorForPercentage(relativePercentage);
+
+                var newSize = ((relativePercentage*70) + 80).toString() + "px";
+
+                circle.style.width = newSize;
+                circle.style.height = newSize;
+                circle.style.borderRadius = newSize;
+
+                document.getElementById('date-text').innerHTML = dates[dayIndex].format('Do MMMM');
+                
+
+            });
+
+        }
+
+        var color = Chart.helpers.color;
+        var ctx = document.getElementById("myChart").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates, 
+                datasets: [{
+                    pointRadius: 10,
+                    pointHoverRadius: 10,
+                    fill: false,
+                    backgroundColor: color('#41a3f4').alpha(0.5).rgbString(),
+                    borderColor: color('#41a3f4').alpha(0.5).rgbString(),
+                    label: 'Left Corner %',
+                    data: percentages['lc']
+                },
+                {
+                    pointRadius: 10,
+                    pointHoverRadius: 10,
+                    fill: false,
+                    backgroundColor: color('#f44f41').alpha(0.5).rgbString(),
+                    borderColor: color('#f44f41').alpha(0.5).rgbString(),
+                    label: 'Right Corner %',
+                    data: percentages['rc']
+                },
+                {
+                    pointRadius: 10,
+                    pointHoverRadius: 10,
+                    fill: false,
+                    backgroundColor: color('#ff7f50').alpha(0.5).rgbString(),
+                    borderColor: color('#ff7f50').alpha(0.5).rgbString(),
+                    label: 'Free Throw %',
+                    data: percentages['ft']
+                },
+                {
+                    label: 'AS Free Throw',
+                    data: [70, 70, 70, 70],
+                    fill: false,
+                    pointRadius: 0,
+                    borderDash: [10, 10],
+                    backgroundColor: color('black').alpha(0.5).rgbString(),
+                    borderColor: color('black').alpha(0.5).rgbString(),
+                    // Changes this dataset to become a line
+                    type: 'line'
+                },
+                {
+                    label: 'AS Corner Jump Shot',
+                    data: [30, 30, 30, 30],
+                    fill: false,
+                    pointRadius: 0,
+                    borderDash: [5, 5],
+                    backgroundColor: color('black').alpha(0.5).rgbString(),
+                    borderColor: color('black').alpha(0.5).rgbString(),
+
+                    // Changes this dataset to become a line
+                    type: 'line'
+                }]
+            },
+            options: {
+                tooltips: {
+                    // Disable the on-canvas tooltip
+                    enabled: true,
+
+                    custom: function (tooltipModel) {
+                        if (tooltipModel.dataPoints) {
+                            var index = tooltipModel.dataPoints[0].index;
+                            console.log(index);
+                            displayDayOnCourt(index);
+                        }
+
+                    }
+                },
+
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Date'
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            suggestedMax: 80
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Shot success percentage'
+                        }
+                    }]
+                },
+            }
+        });
+
+
+        var percentColors = [
+            { pct: 0.0, color: { r: 0xff, g: 0x00, b: 0 } },
+            { pct: 0.5, color: { r: 0xff, g: 0xff, b: 0 } },
+            { pct: 1.0, color: { r: 0x00, g: 0xff, b: 0 } }];
+
+        var getColorForPercentage = function (pct) {
+            for (var i = 1; i < percentColors.length - 1; i++) {
+                if (pct < percentColors[i].pct) {
+                    break;
+                }
+            }
+            var lower = percentColors[i - 1];
+            var upper = percentColors[i];
+            var range = upper.pct - lower.pct;
+            var rangePct = (pct - lower.pct) / range;
+            var pctLower = 1 - rangePct;
+            var pctUpper = rangePct;
+            var color = {
+                r: Math.floor(lower.color.r * pctLower + upper.color.r * pctUpper),
+                g: Math.floor(lower.color.g * pctLower + upper.color.g * pctUpper),
+                b: Math.floor(lower.color.b * pctLower + upper.color.b * pctUpper)
+            };
+            return 'rgb(' + [color.r, color.g, color.b].join(',') + ')';
+            // or output as hex if preferred
+        }
+
+        displayDayOnCourt(dates.length-1);
+
+    </script>
+
+
+
+</body>
+
+</html>
