@@ -182,28 +182,32 @@
 
     <script>
 
-        var dates = [ // Date Objects
+        const dates = [ // Date Objects
             moment("2018-10-16"),
             moment("2018-10-17"),
+            moment("2018-10-18"),
         ];
 
-        var shotsMade = {
-            'lc': [0, 9],
-            'rc': [0, 13],
-            'ft': [0, 38]
+        const shotsMade = {
+            'lc': [0, 9, 11],
+            'rc': [0, 13, 7],
+            'ft': [0, 38, 12]
         }
 
-        var volume = {
-            'lc': [0, 50],
-            'rc': [0, 50],
-            'ft': [0, 100]
+        const volume = {
+            'lc': [0, 50, 50],
+            'rc': [0, 50, 50],
+            'ft': [0, 100, 50]
         }
 
-        var percentages = {
-            'lc': [0, 18],
-            'rc': [0, 26],
-            'ft': [0, 38]
+        const percentages = {
+            'lc': [0, 18, 22],
+            'rc': [0, 26, 14],
+            'ft': [0, 38, 24]
         }
+        
+        const as_free_throw = Array.apply(null, Array(dates.length)).map(Number.prototype.valueOf, 90);
+        const as_3pt = Array.apply(null, Array(dates.length)).map(Number.prototype.valueOf, 70);
 
         function displayDayOnCourt(dayIndex) {
 
@@ -272,7 +276,7 @@
                 },
                 {
                     label: 'AS Free Throw',
-                    data: [90, 90],
+                    data: as_free_throw,
                     fill: false,
                     pointRadius: 0,
                     borderDash: [10, 10],
@@ -283,7 +287,7 @@
                 },
                 {
                     label: 'AS Corner Jump Shot',
-                    data: [70, 70],
+                    data: as_3pt,
                     fill: false,
                     pointRadius: 0,
                     borderDash: [5, 5],
